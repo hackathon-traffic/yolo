@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from pydarknet import Detector, Image
 import cv2
 import os
@@ -5,9 +6,13 @@ import os
 if __name__ == "__main__":
     # net = Detector(bytes("cfg/densenet201.cfg", encoding="utf-8"), bytes("densenet201.weights", encoding="utf-8"), 0, bytes("cfg/imagenet1k.data",encoding="utf-8"))
 
-    net = Detector(bytes("./darknet/cfg/yolov3.cfg", encoding="utf-8"),
-            bytes("./darknet/yolov3.weights", encoding="utf-8"), 0,
-            bytes("./darknet/cfg/coco.data",encoding="utf-8"))
+
+    darknet_path = os.environ['DARKNET_HOME']
+    config = os.path.join(darknet_path, 'cfg/yolov3.cfg')
+    weights = os.path.join(darknet_path, 'yolov3.weights')
+    coco = os.path.join(darknet_path, 'cfg/coco.data')
+
+    net = Detector(bytes(config, encoding="utf-8"), bytes(weights, encoding="utf-8"), 0, bytes(coco, encoding="utf-8"))
 
     img = cv2.imread("la_traffic.jpg")
 
