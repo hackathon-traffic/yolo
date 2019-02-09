@@ -4,8 +4,14 @@ import cv2
 import os
 
 if __name__ == "__main__":
-    # net = Detector(bytes("cfg/densenet201.cfg", encoding="utf-8"), bytes("densenet201.weights", encoding="utf-8"), 0, bytes("cfg/imagenet1k.data",encoding="utf-8"))
+    import argparse
 
+    parser = argparse.ArgumentParser(description='Process an image.')
+    parser.add_argument('path', metavar='image_path', type=str, help='Path to source image')
+
+    args = parser.parse_args()
+    print("Source Path:", args.path)
+    cap = cv2.VideoCapture(args.path)
 
     darknet_path = os.environ['DARKNET_HOME']
     config = os.path.join(darknet_path, 'cfg/yolov3.cfg')
@@ -14,7 +20,7 @@ if __name__ == "__main__":
 
     net = Detector(bytes(config, encoding="utf-8"), bytes(weights, encoding="utf-8"), 0, bytes(coco, encoding="utf-8"))
 
-    img = cv2.imread("la_traffic.jpg")
+    img = cv2.imread(args.path)
 
     img2 = Image(img)
 
