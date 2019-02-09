@@ -8,10 +8,9 @@ import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-
 class Watcher:
     def __init__(self):
-        self.DIRECTORY_TO_WATCH = './img'
+        self.DIRECTORY_TO_WATCH = './input'
         print('Watching \'%s\' directory for images' % self.DIRECTORY_TO_WATCH)
         self.observer = Observer()
 
@@ -42,23 +41,24 @@ class Handler(FileSystemEventHandler):
 
 
 def process_image(image_path):
-    output_dat = './dat/' + image_path.split('/')[-1] + '.dat'
-    output_img = './dat/' + image_path.split('/')[-1] + '.jpg'
+    output_dat = './dat/' + image_path.split('/')[-1].split('.')[0] + '.dat'
+    output_img = './output/' + image_path.split('/')[-1]
     img = cv2.imread(image_path)
     img2 = Image(img)
-    img_width = img.shape[1]
-    img_height = img.shape[0]
+    img_height = float(img.shape[0])
+    img_width = float(img.shape[1])
 
     results = net.detect(img2)
     output = open(output_dat, 'w')
+    output.write("%d\t%d\n" % (img_width, img_height))
+    output.write("\n")
     for cat, score, bounds in results:
         x, y, w, h = bounds
-        x_scaled = float(x) / img_width
-        y_scaled = float(y) / img_width
-        output.write("%8s\tX:%8d\tY:%8d\n" % (str(cat), x, y))
-        output.write("%8s\tX:%8d\tY:%8d\n" % ('Scaled:', x_scaled, y_scaled))
+
+        x_scaled = (2*x / img_height) - 1
+        y_scaled = (2*(img_height-y) / img_height) - 1
+        output.write("%d\t%d\n" % (x, y))
         cv2.rectangle(img, (int(x - w / 2), int(y - h / 2)), (int(x + w / 2), int(y + h / 2)), (255, 0, 0), thickness=2)
-        cv2.putText(img,str(cat.decode("utf-8")),(int(x),int(y)),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,0))
         cv2.imwrite(output_img, img)
 
     print('%d Detections logged in %s' % (len(results), output_dat))
