@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 from pydarknet import Detector, Image
+import argparse
 import cv2
 import os
 
 if __name__ == "__main__":
-    import argparse
-
     parser = argparse.ArgumentParser(description='Process an image.')
     parser.add_argument('path', metavar='image_path', type=str, help='Path to source image')
-
+    parser.add_argument('output', metavar='output_path', type=str, help='Data file for output')
     args = parser.parse_args()
-    print("Source Path:", args.path)
-    cap = cv2.VideoCapture(args.path)
 
     darknet_path = os.environ['DARKNET_HOME']
     config = os.path.join(darknet_path, 'cfg/yolov3.cfg')
@@ -26,14 +23,15 @@ if __name__ == "__main__":
 
     # r = net.classify(img2)
     results = net.detect(img2)
-    print(results)
+
+    output = open(args.output, 'w')
 
     for cat, score, bounds in results:
+        output.write("%s at %s, %s\n" % (str(cat), score, bounds))
         x, y, w, h = bounds
         cv2.rectangle(img, (int(x - w / 2), int(y - h / 2)), (int(x + w / 2), int(y + h / 2)), (255, 0, 0), thickness=2)
         cv2.putText(img,str(cat.decode("utf-8")),(int(x),int(y)),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,0))
 
-    cv2.imshow("output", img)
-    # img2 = pydarknet.load_image(img)
-
-    cv2.waitKey(0)
+    print('%d Detections logged in %s' % (len(results), args.output))
+    #cv2.imshow("output", img)
+    #cv2.waitKey(0)
